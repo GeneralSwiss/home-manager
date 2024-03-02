@@ -9,15 +9,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     menvim = {
-     url = "/Users/nick/.config/me-nvim";
+     url = "github:GeneralSwiss/me-nvim";
+    };
+    flake-utils = {
+      url = "github:numtide/flake-utils";
     };
   };
 
-  outputs = { nixpkgs, home-manager, menvim, ... }:
+  outputs = { self, flake-utils, nixpkgs, home-manager, menvim, ... }:
+    flake-utils.lib.eachDefaultSystem (system:
     let
-      system = "x86_64-darwin";
-      pkgs = nixpkgs.legacyPackages.${system};
-      nvim = menvim.packages.${system};
+      menvim-overlay = self: super: { neovim = self.callPackge menvim {}; };
+      pkgs = import nixpkgs { inherit system; overlays = [ menvim-overlay ]; };
     in {
       homeConfigurations."nick" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
@@ -28,7 +31,6 @@
 
         # Optionally use extraSpecialArgs
         # to pass through arguments to home.nix
-        extraSpecialArgs = { inherit nvim system; };
       };
     };
 }

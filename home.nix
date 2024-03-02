@@ -1,4 +1,4 @@
-{ config, pkgs, nvim, system, ... }:
+{ config, pkgs, system, ... }:
 
 {
   # Home Manager needs a bit of information about you and the paths it should
@@ -37,7 +37,7 @@
     lsd
     fish
     starship
-    nvim.default
+    neovim
     gh
   ];
 
