@@ -13,7 +13,7 @@
   # You should not change this value, even if you update Home Manager. If you do
   # want to update the value, then make sure to first check the Home Manager
   # release notes.
-  home.stateVersion = "23.11"; # Please read the comment before changing.
+  home.stateVersion = "24.05"; # Please read the comment before changing.
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
@@ -34,7 +34,18 @@
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')
+    rustup
+    dust
+    ripgrep
+    fzf
     lsd
+    git
+    jq
+    navi
+    lf
+    jdk21
+    tldr
+    fd
     fish
     starship
     neovim
@@ -73,6 +84,13 @@
   #
   home.sessionVariables = {
     EDITOR = "nvim";
+    CLICOLOR = 1;
+  };
+
+  home.shellAliases = {
+    man = "batman";
+    cat = "bat";
+    du = "dust";
   };
 
   # Let Home Manager install and manage itself.
@@ -81,15 +99,72 @@
   programs.fish = {
     enable = true;
   };
+  programs.bat = {
+    enable = true;
+    extraPackages = with pkgs.bat-extras; [ batman ];
+  };
+  programs.git = {
+    enable = true;
+    diff-so-fancy.enable = true;
+    ignores = [ "*~" "*.swp" ];
+    aliases = {
+      lg = "log --graph --full-history --all --pretty=format:'%h%x09%C(cyan)(%cr)%Creset - %<(20,trunc)%C(magenta)%an%x09%C(yellow)%d%Creset%x20%s'";
+    };
+  };
+  programs.jq.enable = true;
+  programs.navi = {
+    enable = true;
+    enableFishIntegration = true;
+  };
+  programs.lf = {
+    enable = true;
+    settings = {
+      preview = true;
+      hidden = true;
+      drawbox = true;
+      icons = true;
+      ignorecase = true;
+    };
+  };
   programs.lsd = {
     enable = true;
+    enableAliases = true;
     settings = {
       date = "relative";
     };
-    enableAliases = true;
   };
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    oh-my-zsh = {
+      enable = true;
+      plugins = [ "git" ];
+      };
+      };
   programs.starship = {
     enable = true;
-    enableFishIntegration = true;
+  };
+  programs.tmux = {
+    enable = true;
+    mouse = true;
+    terminal = "screen-256color";
+    baseIndex = 1;
+    clock24 = true;
+    plugins = with pkgs; [
+      {
+        plugin = tmuxPlugins.resurrect;
+	extraConfig = "set -g @ressurect-strategy-nvim 'session'";
+      }
+      {
+        plugin = tmuxPlugins.continuum;
+	extraConfig = ''
+	  set -g @continuum-restore 'on'
+	  set -g @continuum-save-interval '15' # minutes
+        '';
+      }
+    ];
+    extraConfig = ''
+      setenv -g EDITOR nvim\n
+    '';
   };
 }
