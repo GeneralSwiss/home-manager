@@ -3,7 +3,6 @@
 {
   # Basic configuration
   home.username = "nick";
-  home.homeDirectory = "/Users/nick";
   home.stateVersion = "24.05";
 
   # Install Nix packages
@@ -25,7 +24,6 @@
     buku
     autojump
     taskwarrior3
-    pngpaste
     lsd
     jdk21
     fish
@@ -59,6 +57,8 @@
     };
     git = {
       enable = true;
+      userEmail = "nicolas.farrier@gmail.com";
+      userName = "GeneralSwiss";
       diff-so-fancy.enable = true;
       ignores = [ "*~" "*.swp" ];
       aliases = {
@@ -81,7 +81,17 @@
         man = "batman";
         cat = "bat";
       };
-      shellInitLast = "eval \"$(/usr/local/bin/brew shellenv)\"";
+      plugins = [
+        {
+          name = "nix-env";
+          src = pkgs.fetchFromGitHub {
+            owner = "lilyball";
+            repo = "nix-env.fish";
+            rev = "7b65bd228429e852c8fdfa07601159130a818cfa";
+            sha256 = "sha256-RG/0rfhgq6aEKNZ0XwIqOaZ6K5S4+/Y5EEMnIdtfPhk=";
+          };
+        }
+      ];
     };
     lsd = {
       enable = true;
