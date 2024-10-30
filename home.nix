@@ -1,170 +1,116 @@
-{ config, pkgs, system, ... }:
+{ config, pkgs, ... }:
 
 {
-  # Home Manager needs a bit of information about you and the paths it should
-  # manage.
+  # Basic configuration
   home.username = "nick";
   home.homeDirectory = "/Users/nick";
+  home.stateVersion = "24.05";
 
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
-  home.stateVersion = "24.05"; # Please read the comment before changing.
-
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
+  # Install Nix packages
   home.packages = with pkgs; [
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
-    # pkgs.hello
-
-    # # It is sometimes useful to fine-tune packages, for example, by applying
-    # # overrides. You can do that directly here, just don't forget the
-    # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
-    # # fonts?
-    # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
-
-    # # You can also create simple shell scripts directly inside your
-    # # configuration. For example, this adds a command 'my-hello' to your
-    # # environment:
-    # (pkgs.writeShellScriptBin "my-hello" ''
-    #   echo "Hello, ${config.home.username}!"
-    # '')
     rustup
     dust
     ripgrep
     fzf
-    lsd
     git
+    tig
     jq
     navi
     lf
-    jdk21
+    watson
     tldr
     fd
+    ack
+    nodejs_22
+    buku
+    autojump
+    taskwarrior3
+    pngpaste
+    lsd
+    jdk21
     fish
     starship
     neovim
     gh
+    tmux
+    zola
   ];
 
-  # Home Manager is pretty good at managing dotfiles. The primary way to manage
-  # plain files is through 'home.file'.
-  home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
-  };
-
-  # Home Manager can also manage your environment variables through
-  # 'home.sessionVariables'. If you don't want to manage your shell through Home
-  # Manager then you have to manually source 'hm-session-vars.sh' located at
-  # either
-  #
-  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  /etc/profiles/per-user/nick/etc/profile.d/hm-session-vars.sh
-  #
+  # Configure session variables
   home.sessionVariables = {
     EDITOR = "nvim";
     CLICOLOR = 1;
   };
 
+  # Aliases for shells
   home.shellAliases = {
     man = "batman";
     cat = "bat";
     du = "dust";
   };
 
-  # Let Home Manager install and manage itself.
+  # Enable Home Manager management of itself
   programs.home-manager.enable = true;
-  
-  programs.fish = {
-    enable = true;
-  };
-  programs.bat = {
-    enable = true;
-    extraPackages = with pkgs.bat-extras; [ batman ];
-  };
-  programs.git = {
-    enable = true;
-    diff-so-fancy.enable = true;
-    ignores = [ "*~" "*.swp" ];
-    aliases = {
-      lg = "log --graph --full-history --all --pretty=format:'%h%x09%C(cyan)(%cr)%Creset - %<(20,trunc)%C(magenta)%an%x09%C(yellow)%d%Creset%x20%s'";
-    };
-  };
-  programs.jq.enable = true;
-  programs.navi = {
-    enable = true;
-    enableFishIntegration = true;
-  };
-  programs.lf = {
-    enable = true;
-    settings = {
-      preview = true;
-      hidden = true;
-      drawbox = true;
-      icons = true;
-      ignorecase = true;
-    };
-  };
-  programs.lsd = {
-    enable = true;
-    enableAliases = true;
-    settings = {
-      date = "relative";
-    };
-  };
-  programs.zsh = {
-    enable = true;
-    enableCompletion = true;
-    oh-my-zsh = {
+
+  programs = {
+    bat = {
       enable = true;
-      plugins = [ "git" ];
+      extraPackages = with pkgs.bat-extras; [ batman ];
+    };
+    git = {
+      enable = true;
+      diff-so-fancy.enable = true;
+      ignores = [ "*~" "*.swp" ];
+      aliases = {
+        lg = "log --graph --full-history --all --pretty=format:'%h%x09%C(cyan)(%cr)%Creset - %<(20,trunc)%C(magenta)%an%x09%C(yellow)%d%Creset%x20%s'";
       };
+    };
+    autojump = {
+      enable = true;
+      enableFishIntegration = true;
+    };
+    jq.enable = true;
+    navi = {
+      enable = true;
+      enableFishIntegration = true;
+    };
+    fish = {
+      enable = true;
+      shellAliases = {
+        vim = "nvim";
+        man = "batman";
+        cat = "bat";
       };
-  programs.starship = {
-    enable = true;
-  };
-  programs.tmux = {
-    enable = true;
-    mouse = true;
-    terminal = "screen-256color";
-    baseIndex = 1;
-    clock24 = true;
-    plugins = with pkgs; [
-      {
-        plugin = tmuxPlugins.resurrect;
-	extraConfig = "set -g @ressurect-strategy-nvim 'session'";
-      }
-      {
-        plugin = tmuxPlugins.continuum;
-	extraConfig = ''
-	  set -g @continuum-restore 'on'
-	  set -g @continuum-save-interval '15' # minutes
-        '';
-      }
-    ];
-    extraConfig = ''
-      setenv -g EDITOR nvim\n
-    '';
+      shellInitLast = "eval \"$(/usr/local/bin/brew shellenv)\"";
+    };
+    lsd = {
+      enable = true;
+      enableAliases = true;
+      settings = {
+        date = "relative";
+      };
+    };
+    starship.enable = true;
+    tmux = {
+      enable = true;
+      mouse = true;
+      terminal = "screen-256color";
+      baseIndex = 1;
+      clock24 = true;
+      plugins = with pkgs; [
+        {
+          plugin = pkgs.tmuxPlugins.resurrect;
+          extraConfig = "set -g @resurrect-strategy-nvim 'session'";
+        }
+        {
+          plugin = pkgs.tmuxPlugins.continuum;
+          extraConfig = ''
+            set -g @continuum-restore 'on'
+            set -g @continuum-save-interval '15'
+          '';
+        }
+      ];
+      extraConfig = "setenv -g EDITOR nvim\n";
+    };
   };
 }
