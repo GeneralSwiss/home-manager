@@ -36,6 +36,8 @@
     gh                     # GitHub CLI tool for interacting with GitHub
     tmux                   # Terminal multiplexer for managing multiple sessions
     zola                   # Static site generator
+    go                     # GoLang
+    lazygit                # Git TUI
   ];
 
   # Environment variables for the session
