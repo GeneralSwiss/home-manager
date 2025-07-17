@@ -36,6 +36,8 @@
     gh                     # GitHub CLI tool for interacting with GitHub
     tmux                   # Terminal multiplexer for managing multiple sessions
     zola                   # Static site generator
+    go                     # GoLang
+    lazygit                # Git TUI
   ];
 
   # Environment variables for the session
@@ -119,7 +121,7 @@
     # lsd configuration (modern alternative to ls)
     lsd = {
       enable = true;
-      enableAliases = true;  # Enable standard aliases for lsd, like `ls`
+      enableFishIntegration = true;  # Enable standard aliases for lsd, like `ls`
       settings = {
         date = "relative";   # Display file dates in relative format (e.g., "3 days ago")
       };

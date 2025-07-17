@@ -25,7 +25,7 @@
           ./darwin.nix
         ];
       };
-      "nick@NFPC" = home-manager.lib.homeManagerConfiguration {
+      "nick@ubuntu" = home-manager.lib.homeManagerConfiguration {
         pkgs = makePkgs "x86_64-linux";
         modules = [
           ./home.nix
