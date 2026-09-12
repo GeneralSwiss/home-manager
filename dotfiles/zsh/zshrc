@@ -129,6 +129,14 @@ case ":$PATH:" in
 esac
 # pnpm end
 
+# Homebrew (macOS only; a no-op on Linux where the paths do not exist).
+# Apple Silicon installs to /opt/homebrew, Intel to /usr/local.
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
 # Zoxide -- must be last: it wraps `cd`, so anything sourced afterwards that
 # also touches `cd` (or resets PATH) would clobber the wrapper.
 eval "$(zoxide init --cmd cd zsh)"
