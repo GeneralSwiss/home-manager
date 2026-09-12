@@ -59,8 +59,23 @@ mv ~/.config/nvim ~/.config/nvim.pre-hm 2>/dev/null
 nix run home-manager/master -- switch --flake .#nick@ubuntu
 ```
 
-Machine targets: `nick@ubuntu` (x86_64 Linux), `nick@mac` (Apple Silicon),
-`nick@mac-intel`.
+Machine targets: `nick@ubuntu` (x86_64 Linux), `nick@oldbox` (older Linux),
+`nick@mac` (Apple Silicon), `nick@mac-intel`. The names are labels, not hostnames
+— rename freely, they only have to match the `#target` you pass to `switch`.
+
+### Old glibc machines
+
+This is the case Nix earns its keep on. A stock Neovim binary needs `GLIBC_2.34`,
+which rules out RHEL 8 (2.28), Ubuntu 20.04 (2.31) and anything older. Nix-built
+binaries link the store's own glibc — their ELF interpreter points at
+`/nix/store/…/ld-linux-x86-64.so.2`, not `/lib64` — so the host's version stops
+mattering.
+
+That covers what Nix installs. It does **not** cover Mason, which downloads
+prebuilt binaries at runtime and is still subject to the host glibc. Hence the
+language servers in `home.nix`, and `dotfiles/nvim/lua/plugins/nix-lsp.lua`,
+which detects a server already on PATH and tells Mason to stand down for it.
+Machines without those packages keep the Mason behaviour untouched.
 
 ### The collision trap
 

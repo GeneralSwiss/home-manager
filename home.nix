@@ -52,6 +52,24 @@ in
     # Editor
     neovim                 # Configured by the dotfiles/nvim submodule
 
+    # Language servers and formatters.
+    #
+    # These exist here rather than being left to Mason for a specific reason:
+    # Mason downloads prebuilt binaries linked against the *host* glibc, so on
+    # an older distribution they fail exactly the way a stock neovim does.
+    # Nix ships its own glibc in the store, so these run anywhere Nix runs.
+    # dotfiles/nvim/lua/plugins/nix-lsp.lua detects them on PATH and tells
+    # Mason to stand down for those servers.
+    lua-language-server
+    marksman                       # Markdown
+    taplo                          # TOML
+    vscode-langservers-extracted   # html/css/json/eslint
+    astro-language-server
+    stylua                         # Lua formatter
+    shfmt                          # Shell formatter
+    markdownlint-cli2
+    tree-sitter
+
     # CLI replacements referenced by the shell aliases in dotfiles/zsh/zshrc
     lsd                    # ls
     dust                   # du

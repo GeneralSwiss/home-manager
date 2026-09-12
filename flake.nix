@@ -28,6 +28,15 @@
           platformModule = ./linux.nix;
         };
 
+        # Older Linux box. The whole reason this machine is here: its glibc
+        # predates GLIBC_2.34, which a stock neovim binary requires, so the
+        # distro packages cannot run it. Nix supplies its own glibc from the
+        # store and sidesteps the host entirely.
+        "nick@oldbox" = mkHome {
+          system = "x86_64-linux";
+          platformModule = ./linux.nix;
+        };
+
         # macOS. Apple Silicon is the default; the Intel entry stays for older
         # hardware. The previous revision declared only x86_64-darwin, which
         # would have failed to evaluate on any M-series machine.
