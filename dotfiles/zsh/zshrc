@@ -1,0 +1,129 @@
+### Added by Zinit's installer
+if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
+    print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
+    command mkdir -p "$HOME/.local/share/zinit" && command chmod g-rwX "$HOME/.local/share/zinit"
+    command git clone https://github.com/zdharma-continuum/zinit "$HOME/.local/share/zinit/zinit.git" && \
+        print -P "%F{33} %F{34}Installation successful.%f%b" || \
+        print -P "%F{160} The clone has failed.%f%b"
+fi
+
+source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+# Load a few important annexes, without Turbo
+# (this is currently required for annexes)
+zinit light-mode for \
+    zdharma-continuum/zinit-annex-as-monitor \
+    zdharma-continuum/zinit-annex-bin-gem-node \
+    zdharma-continuum/zinit-annex-patch-dl \
+    zdharma-continuum/zinit-annex-rust
+
+### End of Zinit's installer chunk
+
+zinit light zsh-users/zsh-syntax-highlighting
+zinit light zsh-users/zsh-completions
+zinit light zsh-users/zsh-autosuggestions
+zinit light Aloxaf/fzf-tab
+
+# Load starship theme
+# line 1: `starship` binary as command, from github release
+# line 2: starship setup at clone(create init.zsh, completion)
+# line 3: pull behavior same as clone, source init.zsh
+zinit ice as"command" from"gh-r" \
+          atclone"./starship init zsh > init.zsh; ./starship completions zsh > _starship" \
+          atpull"%atclone" src"init.zsh"
+zinit light starship/starship
+
+
+# Load Completions
+autoload -U compinit && compinit
+export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/nick/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/nick/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/nick/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/nick/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+# Keybindings
+bindkey -e
+bindkey '^p' history-search-backward
+bindkey '^n' history-search-forward
+
+# History
+HISTSIZE=5000
+HISTFILE=~/.zsh_history
+SAVEHIST=$HISTSIZE
+HISTDUP=erase
+setopt appendhistory
+setopt sharehistory
+setopt hist_ignore_space
+setopt hist_ignore_all_dups
+setopt hist_save_no_dups
+setopt hist_ignore_dups
+setopt hist_find_no_dups
+
+# Completion styling
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-a}'
+zstyle ':completion:*' menu no 
+# Fzf Shell Integrations 
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+export FZF_DEFAULT_OPTS="--style full"
+# Options for path completion (e.g. vim **<TAB>)
+export FZF_COMPLETION_PATH_OPTS='--walker file,dir,follow,hidden'
+
+# Options for directory completion (e.g. cd **<TAB>)
+export FZF_COMPLETION_DIR_OPTS='--walker dir,follow'
+
+# Advanced customization of fzf options via _fzf_comprun function
+# - The first argument to the function is the name of the command.
+# - You should make sure to pass the rest of the arguments ($@) to fzf.
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf --preview 'tree -C {} | head -200'   "$@" ;;
+    export|unset) fzf --preview "eval 'echo \$'{}"         "$@" ;;
+    ssh)          fzf --preview 'dig {}'                   "$@" ;;
+    *)            fzf --preview 'bat -n --color=always {}' "$@" ;;
+  esac
+}
+
+# lsd
+alias ls='lsd'
+alias ll='ls -l'
+alias la='ls -a'
+alias lla='ls -la'
+alias lt='ls --tree'
+
+# Batcat
+alias cat='bat'
+
+# lazygit TUI
+alias lg='lazygit'
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# pnpm
+export PNPM_HOME="/home/nick/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# Zoxide -- must be last: it wraps `cd`, so anything sourced afterwards that
+# also touches `cd` (or resets PATH) would clobber the wrapper.
+eval "$(zoxide init --cmd cd zsh)"
