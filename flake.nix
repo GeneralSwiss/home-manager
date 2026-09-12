@@ -5,15 +5,15 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = { url = "github:nix-community/home-manager"; inputs.nixpkgs.follows = "nixpkgs"; };
-    nixvim-neovim = { url = "github:GeneralSwiss/nixvim-neovim"; inputs.nixpkgs.follows = "nixpkgs"; };
+    # nixvim-neovim = { url = "github:GeneralSwiss/nixvim-neovim"; inputs.nixpkgs.follows = "nixpkgs"; };
   };
 
-  outputs = { self, nixpkgs, home-manager, nixvim-neovim, ... }:
+  outputs = { self, nixpkgs, home-manager, ... }:
     let
       makePkgs = system: import nixpkgs {
         inherit system;
         overlays = [
-          (final: prev: { neovim = nixvim-neovim.packages.${system}.default; })
+          # (final: prev: { neovim = nixvim-neovim.packages.${system}.default; })
         ];
       };    
     in {
