@@ -3,9 +3,8 @@
 {
   home.homeDirectory = "/Users/nick";
 
-  # Install Nix packages
   home.packages = with pkgs; [
-    pngpaste
+    pngpaste               # Paste images from the macOS clipboard to a file
   ];
-  programs.fish.shellInitLast = "eval \"$(/usr/local/bin/brew shellenv)\""; 
+
 }

@@ -1,37 +1,54 @@
-# main flake.nix
 {
-  description = "Main configuration applying system-specific home-config-flake artifacts";
+  description = "Reproducible user environment: packages via Nix, behaviour via tracked dotfiles";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    home-manager = { url = "github:nix-community/home-manager"; inputs.nixpkgs.follows = "nixpkgs"; };
-    nixvim-neovim = { url = "github:GeneralSwiss/nixvim-neovim"; inputs.nixpkgs.follows = "nixpkgs"; };
-  };
-
-  outputs = { self, nixpkgs, home-manager, nixvim-neovim, ... }:
-    let
-      makePkgs = system: import nixpkgs {
-        inherit system;
-        overlays = [
-          (final: prev: { neovim = nixvim-neovim.packages.${system}.default; })
-        ];
-      };    
-    in {
-      homeConfigurations = {
-      "nick@Nicks-MacBook-Pro" = home-manager.lib.homeManagerConfiguration {
-        pkgs = makePkgs "x86_64-darwin";
-        modules = [
-          ./home.nix
-          ./darwin.nix
-        ];
-      };
-      "nick@ubuntu" = home-manager.lib.homeManagerConfiguration {
-        pkgs = makePkgs "x86_64-linux";
-        modules = [
-          ./home.nix
-          ./linux.nix
-        ];
-      };
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
+
+  outputs = { self, nixpkgs, home-manager, ... }:
+    let
+      # One helper instead of a copy-pasted block per machine: adding a box is a
+      # single line below rather than eight, and every machine is guaranteed to
+      # get home.nix rather than drifting by omission.
+      mkHome = { system, platformModule }:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = import nixpkgs { inherit system; };
+          modules = [ ./home.nix platformModule ];
+        };
+    in
+    {
+      homeConfigurations = {
+        # Linux desktop
+        "nick@ubuntu" = mkHome {
+          system = "x86_64-linux";
+          platformModule = ./linux.nix;
+        };
+
+        # Older Linux box. The whole reason this machine is here: its glibc
+        # predates GLIBC_2.34, which a stock neovim binary requires, so the
+        # distro packages cannot run it. Nix supplies its own glibc from the
+        # store and sidesteps the host entirely.
+        "nick@oldbox" = mkHome {
+          system = "x86_64-linux";
+          platformModule = ./linux.nix;
+        };
+
+        # macOS. Apple Silicon is the default; the Intel entry stays for older
+        # hardware. The previous revision declared only x86_64-darwin, which
+        # would have failed to evaluate on any M-series machine.
+        "nick@mac" = mkHome {
+          system = "aarch64-darwin";
+          platformModule = ./darwin.nix;
+        };
+
+        "nick@mac-intel" = mkHome {
+          system = "x86_64-darwin";
+          platformModule = ./darwin.nix;
+        };
+      };
+    };
 }
